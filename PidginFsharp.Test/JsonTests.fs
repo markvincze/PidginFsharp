@@ -25,9 +25,9 @@ module JsonTests =
 
     [<Fact>]
     let ``json matches a Json array`` () =
-        let state = StringParseState ("[\"abc\"]", 0)
+        let state = StringParseState ("[\"abc\", \"def\" ]", 0)
         let actual = json state
-        let expected = Success { Consumed = true; Value = JsonArray [ JsonString "abc" ] }, StringParseState ("[\"abc\"]", 7)
+        let expected = Success { Consumed = true; Value = JsonArray [ JsonString "abc"; JsonString "def" ] }, StringParseState ("[\"abc\", \"def\" ]", 15)
 
         Assert.Equal<Result<Json> * ParseState>(expected, actual)
 
@@ -36,5 +36,46 @@ module JsonTests =
         let state = StringParseState ("[[[\"abc\"]]]", 0)
         let actual = json state
         let expected = Success { Consumed = true; Value = JsonArray [ JsonArray [ JsonArray [ JsonString "abc" ] ] ] }, StringParseState ("[[[\"abc\"]]]", 11)
+
+        Assert.Equal<Result<Json> * ParseState>(expected, actual)
+
+    [<Fact>]
+    let ``json matches a simple object`` () =
+        let state = StringParseState ("{ \"foo\": \"bar\" }", 0)
+        let actual = json state
+        let expected = Success { Consumed = true; Value = JsonObject (["foo", JsonString "bar"] |> Map.ofList) }, StringParseState ("{ \"foo\": \"bar\" }", 16)
+
+        Assert.Equal<Result<Json> * ParseState>(expected, actual)
+    
+    [<Fact>]
+    let ``json correctly parses complex Json`` () =
+        let jsonStr = """
+        [
+            {
+                "prop1"  : "val1",
+                "prop2" : { "prop3" : "val2" }
+            },
+            [
+                "val3",
+                { "prop4": "val4" }
+            ]
+        ]
+        """
+        let state = StringParseState (jsonStr, 0)
+        let actual = json state
+        let expected =
+            Success {
+                Consumed = true
+                Value = JsonArray [
+                    JsonObject (
+                        [ "prop1", JsonString "val1"
+                          "prop2", JsonObject ( [ "prop3", JsonString "val2" ] |> Map.ofList)
+                        ] |> Map.ofList )
+                    JsonArray [
+                        JsonString "val3"
+                        JsonObject ( [ "prop4", JsonString "val4" ] |> Map.ofList)
+                    ]
+                ]
+            }, StringParseState (jsonStr, 239)
 
         Assert.Equal<Result<Json> * ParseState>(expected, actual)

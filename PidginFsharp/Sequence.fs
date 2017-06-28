@@ -1,6 +1,8 @@
 namespace PidginFsharp
 
 module Sequence =
+    open Basic
+
     let tryCont cont result =
         match result with
         | Success r, state -> cont r state
@@ -53,7 +55,7 @@ module Sequence =
         sequenceRec parsers state [] false
 
     let sequenceToken tokens state =
-        sequence (List.map Basic.token tokens) state 
+        sequence (List.map token tokens) state 
 
     let string str state =
         sequenceToken (String.explode str) state
@@ -98,3 +100,13 @@ module Sequence =
 
     let between start ending main state =
         map3 (fun r1 r2 r3 -> r2) start main ending state
+
+    let separatedAtLeastOnce separator parser state =
+        match parser state with
+        | Failure r1, state -> Failure r1, state
+        | Success r1, state -> match many (after separator parser) state with
+                               | Failure r2, state -> Failure r2, state
+                               | Success r2, state -> Types.parseSuccess (r1.Consumed || r2.Consumed) (r1.Value :: r2.Value), state
+
+    let separated separator parser state =
+        either (separatedAtLeastOnce separator parser) (value []) state

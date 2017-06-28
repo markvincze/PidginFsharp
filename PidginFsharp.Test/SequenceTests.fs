@@ -288,7 +288,63 @@ module SequenceTests =
     [<Fact>]
     let ``between succeeds if beginning, end and the main parser succeed`` () =
         let state = StringParseState ("AbC", 0)
-        let actual = between (tokenPred Char.IsUpper) (tokenPred Char.IsUpper) any  state
+        let actual = between (tokenPred Char.IsUpper) (tokenPred Char.IsUpper) any state
         let expected = Success { Consumed = true; Value = 'b' }, StringParseState ("AbC", 3)
 
         Assert.Equal<Result<char> * ParseState>(expected, actual)
+
+    [<Fact>]
+    let ``separated succeeds if end of input`` () =
+        let state = StringParseState ("", 0)
+        let actual = separated (token ' ') (string "foo") state
+        let expected = Success { Consumed = false; Value = [] }, StringParseState ("", 0)
+
+        Assert.Equal<Result<string list> * ParseState>(expected, actual)
+
+    [<Fact>]
+    let ``separated succeeds if matches once`` () =
+        let state = StringParseState ("foo", 0)
+        let actual = separated (token ' ') (string "foo") state
+        let expected = Success { Consumed = true; Value = [ "foo" ] }, StringParseState ("foo", 3)
+
+        Assert.Equal<Result<string list> * ParseState>(expected, actual)
+
+    [<Fact>]
+    let ``separated succeeds if matches twice`` () =
+        let state = StringParseState ("foo foo", 0)
+        let actual = separated (token ' ') (string "foo") state
+        let expected = Success { Consumed = true; Value = [ "foo"; "foo" ] }, StringParseState ("foo foo", 7)
+
+        Assert.Equal<Result<string list> * ParseState>(expected, actual)
+
+    [<Fact>]
+    let ``separated succeeds if matches once then no separator`` () =
+        let state = StringParseState ("foobar", 0)
+        let actual = separated (token ' ') (string "foo") state
+        let expected = Success { Consumed = true; Value = [ "foo" ] }, StringParseState ("foobar", 3)
+
+        Assert.Equal<Result<string list> * ParseState>(expected, actual)
+
+    [<Fact>]
+    let ``separated succeeds if first doesn't match`` () =
+        let state = StringParseState ("bar", 0)
+        let actual = separated (token ' ') (string "foo") state
+        let expected = Success { Consumed = false; Value = [ ] }, StringParseState ("bar", 0)
+
+        Assert.Equal<Result<string list> * ParseState>(expected, actual)
+
+    [<Fact>]
+    let ``separated fails if first partially match`` () =
+        let state = StringParseState ("four", 0)
+        let actual = separated (token ' ') (string "foo") state
+        let expected = Failure { Consumed = true; Message = "Not matching token." }, StringParseState ("four", 2)
+
+        Assert.Equal<Result<string list> * ParseState>(expected, actual)
+
+    [<Fact>]
+    let ``separated fails if separator matches but not the next item`` () =
+        let state = StringParseState ("foo bar", 0)
+        let actual = separated (token ' ') (string "foo") state
+        let expected = Failure { Consumed = true; Message = "Not matching token." }, StringParseState ("foo bar", 4)
+
+        Assert.Equal<Result<string list> * ParseState>(expected, actual)

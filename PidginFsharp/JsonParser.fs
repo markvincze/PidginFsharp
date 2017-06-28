@@ -1,7 +1,5 @@
 namespace PidginFsharp
 
-open Basic
-open Sequence
 open System
 
 type Json =
@@ -10,6 +8,8 @@ type Json =
     | JsonObject of Map<string, Json>
 
 module JsonParser =
+    open Basic
+    open Sequence
 
     let whitespace = tokenPred Char.IsWhiteSpace
     let whitespaces = many whitespace
@@ -27,11 +27,24 @@ module JsonParser =
         |> between (token '"') (token '"')
         |> select String.Concat
 
-    let jsonString = Basic.select JsonString string
+    let jsonString = select JsonString string
     
-    let rec json state =
-        oneOf [jsonString; jsonArray] <| state
+    let rec jsonRaw state =
+        oneOf [jsonString; jsonArray; jsonObject] <| state
     and jsonArray state =
-        json
+        jsonRaw
+        |> between whitespaces whitespaces
+        |> separated comma
         |> between lbracket rbracket
-        |> select (fun j -> JsonArray [ j ]) <| state
+        |> select JsonArray <| state
+    and jsonMember state =
+        map2 (fun name value -> name, value) (before string colonWhitespace) jsonRaw <| state
+    and jsonObject state =
+        jsonMember
+        |> between whitespaces whitespaces
+        |> separated comma
+        |> between lbrace rbrace
+        |> select (Map.ofList >> JsonObject) <| state
+
+    let json = jsonRaw |> between whitespaces whitespaces
+
