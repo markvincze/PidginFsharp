@@ -3,11 +3,6 @@ namespace PidginFsharp
 module Sequence =
     open Basic
 
-    let tryCont cont result =
-        match result with
-        | Success r, state -> cont r state
-        | Failure r, state -> Failure r, state
-
     let after parser1 parser2 state =
         match parser1 state with
         | Failure r1, state -> Failure r1, state
@@ -29,7 +24,7 @@ module Sequence =
                                | Failure r2, state -> Types.parseFailure (r1.Consumed || r2.Consumed) r2.Message, state
                                | Success r2, state -> Types.parseSuccess (r1.Consumed || r2.Consumed) (transform r1.Value r2.Value), state
 
-    let bind next parser state = bindAndTransform next (fun r1 r2 -> r2) parser state
+    let bind next = bindAndTransform next (fun r1 r2 -> r2)
 
     let oneOf parsers state =
         let rec oneOfRec parsers state failures =
@@ -42,7 +37,7 @@ module Sequence =
 
         oneOfRec parsers state []
 
-    let either p1 p2 state = oneOf [p1; p2] state
+    let either p1 p2 = oneOf [p1; p2]
 
     let sequence parsers state =
         let rec sequenceRec parsers state results consumed =
@@ -54,12 +49,11 @@ module Sequence =
 
         sequenceRec parsers state [] false
 
-    let sequenceToken tokens state =
-        sequence (List.map token tokens) state 
+    let sequenceToken tokens = sequence (List.map token tokens)
 
-    let string str state =
-        sequenceToken (String.explode str) state
-        |> tryCont (fun r state -> Types.parseSuccess r.Consumed (String.implode r.Value), state)
+    let string str =
+        sequenceToken (String.explode str)
+        |> select String.implode
 
     let map1 func parser state =
         match parser state with
@@ -98,8 +92,7 @@ module Sequence =
                                | Failure r2, state -> Failure r2, state
                                | Success r2, state -> Types.parseSuccess (r1.Consumed || r2.Consumed) (r1.Value :: r2.Value), state
 
-    let between start ending main state =
-        map3 (fun r1 r2 r3 -> r2) start main ending state
+    let between start ending main = map3 (fun r1 r2 r3 -> r2) start main ending
 
     let separatedAtLeastOnce separator parser state =
         match parser state with
@@ -108,5 +101,4 @@ module Sequence =
                                | Failure r2, state -> Failure r2, state
                                | Success r2, state -> Types.parseSuccess (r1.Consumed || r2.Consumed) (r1.Value :: r2.Value), state
 
-    let separated separator parser state =
-        either (separatedAtLeastOnce separator parser) (value []) state
+    let separated separator parser = either (separatedAtLeastOnce separator parser) (value [])

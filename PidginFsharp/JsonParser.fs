@@ -24,13 +24,13 @@ module JsonParser =
 
     let string =
         many (tokenNot '"')
-        |> between (token '"') (token '"')
+        |> between quote quote
         |> select String.Concat
 
-    let jsonString = select JsonString string
+    let jsonString = string |> select JsonString
     
     let rec jsonRaw state =
-        oneOf [jsonString; jsonArray; jsonObject] <| state
+        oneOf [ jsonString; jsonArray; jsonObject ] <| state
     and jsonArray state =
         jsonRaw
         |> between whitespaces whitespaces
@@ -47,4 +47,3 @@ module JsonParser =
         |> select (Map.ofList >> JsonObject) <| state
 
     let json = jsonRaw |> between whitespaces whitespaces
-

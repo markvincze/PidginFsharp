@@ -7,11 +7,11 @@ module Basic =
         | Some t -> (Types.parseFailure false "Not matching token.", state)
         | _ -> (Types.parseFailure false "End of input.", state)
 
-    let token t state = tokenPred (fun t' -> t' = t) state
+    let token t = tokenPred (fun t' -> t' = t)
 
-    let tokenNot t state = tokenPred (fun t' -> t' <> t) state
+    let tokenNot t = tokenPred (fun t' -> t' <> t)
 
-    let value t state = (Types.parseSuccess false t, state)
+    let value t state = Types.parseSuccess false t, state
 
     let any state =
         match ParserState.peek state with

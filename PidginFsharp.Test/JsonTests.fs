@@ -50,32 +50,33 @@ module JsonTests =
     [<Fact>]
     let ``json correctly parses complex Json`` () =
         let jsonStr = """
-        [
-            {
-                "prop1"  : "val1",
-                "prop2" : { "prop3" : "val2" }
-            },
             [
-                "val3",
-                { "prop4": "val4" }
-            ]
-        ]
-        """
-        let state = StringParseState (jsonStr, 0)
-        let actual = json state
-        let expected =
-            Success {
-                Consumed = true
-                Value = JsonArray [
-                    JsonObject (
-                        [ "prop1", JsonString "val1"
-                          "prop2", JsonObject ( [ "prop3", JsonString "val2" ] |> Map.ofList)
-                        ] |> Map.ofList )
-                    JsonArray [
-                        JsonString "val3"
-                        JsonObject ( [ "prop4", JsonString "val4" ] |> Map.ofList)
-                    ]
+                {
+                    "prop1"  : "val1",
+                    "prop2" : { "prop3" : "val2" }
+                },
+                [
+                    "val3",
+                    { "prop4": "val4" }
                 ]
-            }, StringParseState (jsonStr, 239)
+            ]"""
+        let state = StringParseState (jsonStr, 0)
+
+        let actual = json state
+        
+        let expectedJson =
+            JsonArray [
+                JsonObject
+                    (Map [
+                        "prop1", JsonString "val1"
+                        "prop2", JsonObject (Map ["prop3", JsonString "val2"])
+                    ])
+                JsonArray [
+                    JsonString "val3"
+                    JsonObject (Map ["prop4", JsonString "val4"])
+                ]
+            ]
+
+        let expected = Success { Consumed = true; Value = expectedJson }, StringParseState (jsonStr, 269)
 
         Assert.Equal<Result<Json> * ParseState>(expected, actual)
