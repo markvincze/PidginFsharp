@@ -11,7 +11,7 @@
     <Compile Include="ParserState.fs" />
     <Compile Include="Basic.fs" />
     <Compile Include="Sequence.fs" />
-    <Compile Include="Json.fs" />
+    <Compile Include="JsonParser.fs" />
   </ItemGroup>
 
   <ItemGroup>
