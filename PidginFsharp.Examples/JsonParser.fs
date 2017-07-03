@@ -1,6 +1,7 @@
-namespace PidginFsharp
+namespace PidginFsharp.Examples
 
 open System
+open PidginFsharp
 
 type Json =
     | JsonString of string

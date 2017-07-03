@@ -1,6 +1,7 @@
 namespace PidginFsharp.Test
 
 open PidginFsharp
+open PidginFsharp.Examples
 open System
 open Xunit
 
