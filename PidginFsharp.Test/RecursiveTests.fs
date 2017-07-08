@@ -11,8 +11,8 @@ module RecursiveTests =
     let rec parenthesised state =
         state |>
         (before
-            (after (token '(') digitInsideParens)
-            (token ')'))
+            (token ')')
+            (after (token '(') digitInsideParens))
     and digitInsideParens state = state |> (either (tokenPred Char.IsDigit) parenthesised)
 
     [<Fact>]

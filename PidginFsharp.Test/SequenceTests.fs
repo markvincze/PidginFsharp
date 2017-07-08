@@ -35,7 +35,7 @@ module SequenceTests =
     [<Fact>]
     let ``before fails if the first parser fails`` () =
         let state = StringParseState ("abc", 0)
-        let actual = before (token 'x') (token 'b') state
+        let actual = before (token 'b') (token 'x') state
         let expected = Failure { Consumed = false; Message = "Not matching token." }, StringParseState ("abc", 0)
 
         Assert.Equal<Result<char> * ParseState>(expected, actual)
@@ -43,7 +43,7 @@ module SequenceTests =
     [<Fact>]
     let ``before fails if the second parser fails`` () =
         let state = StringParseState ("abc", 0)
-        let actual = before (token 'a') (token 'x') state
+        let actual = before (token 'x') (token 'a') state
         let expected = Failure { Consumed = true; Message = "Not matching token." }, StringParseState ("abc", 1)
 
         Assert.Equal<Result<char> * ParseState>(expected, actual)
@@ -51,7 +51,7 @@ module SequenceTests =
     [<Fact>]
     let ``before returns the first result if both parsers succeed`` () =
         let state = StringParseState ("abc", 0)
-        let actual = before (token 'a') (token 'b') state
+        let actual = before (token 'b') (token 'a') state
         let expected = Success { Consumed = true; Value = 'a' }, StringParseState ("abc", 2)
 
         Assert.Equal<Result<char> * ParseState>(expected, actual)

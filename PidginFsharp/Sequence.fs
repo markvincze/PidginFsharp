@@ -10,10 +10,10 @@ module Sequence =
                                | Failure r2, state -> Types.parseFailure (r1.Consumed || r2.Consumed) r2.Message, state
                                | Success r2, state -> Types.parseSuccess (r1.Consumed || r2.Consumed) r2.Value, state
 
-    let before parser1 parser2 state =
-        match parser1 state with
+    let before suffix parser state =
+        match parser state with
         | Failure r1, state -> Failure r1, state
-        | Success r1, state -> match parser2 state with
+        | Success r1, state -> match suffix state with
                                | Failure r2, state -> Types.parseFailure (r1.Consumed || r2.Consumed) r2.Message, state
                                | Success r2, state -> Types.parseSuccess (r1.Consumed || r2.Consumed) r1.Value, state
 

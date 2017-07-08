@@ -39,7 +39,7 @@ module JsonParser =
         |> between lbracket rbracket
         |> select JsonArray <| state
     and jsonMember state =
-        map2 (fun name value -> name, value) (before string colonWhitespace) jsonRaw <| state
+        map2 (fun name value -> name, value) (before colonWhitespace string) jsonRaw <| state
     and jsonObject state =
         jsonMember
         |> between whitespaces whitespaces
