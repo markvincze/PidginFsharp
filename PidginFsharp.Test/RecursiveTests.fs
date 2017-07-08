@@ -9,11 +9,10 @@ module RecursiveTests =
     open Sequence
 
     let rec parenthesised state =
-        state |>
-        (before
-            (token ')')
-            (after (token '(') digitInsideParens))
-    and digitInsideParens state = state |> (either (tokenPred Char.IsDigit) parenthesised)
+        digitInsideParens
+        |> between (token '(') (token ')') <| state
+    and digitInsideParens state =
+         either (tokenPred Char.IsDigit) parenthesised <| state
 
     [<Fact>]
     let ``digitInsideParens succeeds if the number of parens match`` () =
