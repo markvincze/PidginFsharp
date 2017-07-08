@@ -3,6 +3,21 @@ namespace PidginFsharp
 module Sequence =
     open Basic
 
+    // let bind f m =
+    //     match m with
+    //     | Failure r, state -> Failure r, state
+    //     | Success r, state -> f r state
+
+    // let after2 parser1 parser2 state =
+    //     parser1 state
+    //     |> bind (fun r1 state -> parser2 state
+    //                             |> bind (fun r2 state -> Types.parseSuccess (r1.Consumed || r2.Consumed) r2.Value, state))
+        // match parser1 state with
+        // | Failure r1, state -> Failure r1, state
+        // | Success r1, state -> match parser2 state with
+        //                        | Failure r2, state -> Types.parseFailure (r1.Consumed || r2.Consumed) r2.Message, state
+        //                        | Success r2, state -> Types.parseSuccess (r1.Consumed || r2.Consumed) r2.Value, state
+
     let after parser1 parser2 state =
         match parser1 state with
         | Failure r1, state -> Failure r1, state
