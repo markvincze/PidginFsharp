@@ -4,49 +4,39 @@ open PidginFsharp
 open PidginFsharp.Examples
 open System
 open Xunit
+open JsonParser
 
 module JsonTests =
     open JsonParser
 
     [<Fact>]
     let ``string matches a string`` () =
-        let state = StringParseState ("\"abc\"", 0)
-        let actual = string state
-        let expected = Success { Consumed = true; Value = "abc" }, StringParseState ("\"abc\"", 5)
-
-        Assert.Equal<Result<string> * ParseState>(expected, actual)
+        string |> Util.succeed "\"abc\"" "abc"
 
     [<Fact>]
     let ``json matches a Json string`` () =
-        let state = StringParseState ("\"abc\"", 0)
-        let actual = json state
-        let expected = Success { Consumed = true; Value = JsonString "abc" }, StringParseState ("\"abc\"", 5)
-
-        Assert.Equal<Result<Json> * ParseState>(expected, actual)
+        json |> Util.succeed "\"abc\"" (JsonString "abc")
 
     [<Fact>]
     let ``json matches a Json array`` () =
-        let state = StringParseState ("[\"abc\", \"def\" ]", 0)
-        let actual = json state
-        let expected = Success { Consumed = true; Value = JsonArray [ JsonString "abc"; JsonString "def" ] }, StringParseState ("[\"abc\", \"def\" ]", 15)
-
-        Assert.Equal<Result<Json> * ParseState>(expected, actual)
+        json
+        |> Util.succeed
+            "[\"abc\", \"def\" ]"
+            (JsonArray [ JsonString "abc"; JsonString "def" ])
 
     [<Fact>]
     let ``json matches a nested Json array`` () =
-        let state = StringParseState ("[[[\"abc\"]]]", 0)
-        let actual = json state
-        let expected = Success { Consumed = true; Value = JsonArray [ JsonArray [ JsonArray [ JsonString "abc" ] ] ] }, StringParseState ("[[[\"abc\"]]]", 11)
-
-        Assert.Equal<Result<Json> * ParseState>(expected, actual)
+        json
+        |> Util.succeed
+            "[[[\"abc\"]]]"
+            (JsonArray [ JsonArray [ JsonArray [ JsonString "abc" ] ] ])
 
     [<Fact>]
     let ``json matches a simple object`` () =
-        let state = StringParseState ("{ \"foo\": \"bar\" }", 0)
-        let actual = json state
-        let expected = Success { Consumed = true; Value = JsonObject (["foo", JsonString "bar"] |> Map.ofList) }, StringParseState ("{ \"foo\": \"bar\" }", 16)
-
-        Assert.Equal<Result<Json> * ParseState>(expected, actual)
+        json
+        |> Util.succeed
+            "{ \"foo\": \"bar\" }"
+            (JsonObject (["foo", JsonString "bar"] |> Map.ofList))
     
     [<Fact>]
     let ``json correctly parses complex Json`` () =
@@ -61,10 +51,7 @@ module JsonTests =
                     { "prop4": "val4" }
                 ]
             ]"""
-        let state = StringParseState (jsonStr, 0)
 
-        let actual = json state
-        
         let expectedJson =
             JsonArray [
                 JsonObject
@@ -78,6 +65,4 @@ module JsonTests =
                 ]
             ]
 
-        let expected = Success { Consumed = true; Value = expectedJson }, StringParseState (jsonStr, 269)
-
-        Assert.Equal<Result<Json> * ParseState>(expected, actual)
+        json |> Util.succeed jsonStr expectedJson
