@@ -6,9 +6,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="ParserState.fs" />
     <Compile Include="Types.fs" />
     <Compile Include="String.fs" />
-    <Compile Include="ParserState.fs" />
     <Compile Include="Basic.fs" />
     <Compile Include="Sequence.fs" />
   </ItemGroup>

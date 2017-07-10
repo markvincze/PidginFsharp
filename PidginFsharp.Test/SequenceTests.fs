@@ -170,6 +170,11 @@ module SequenceTests =
         |> Util.succeed "abc" ['a'; 'b'; 'c']
 
     [<Fact>]
+    let ``atLeastOnce only one match`` () =
+        atLeastOnce (tokenPred Char.IsLower)
+        |> Util.succeed "a" ['a']
+
+    [<Fact>]
     let ``between fails if the the beginning fails`` () =
         between (tokenPred Char.IsUpper) any any
         |> Util.fails "abc" false
@@ -229,3 +234,11 @@ module SequenceTests =
     let ``separated fails if separator matches but not the next item`` () =
         separated (token ' ') (string "foo")
         |> Util.fails "foo bar" true
+
+    let ``matching a second string fails without backtracking`` () =
+        either (string "four") (string "foo")
+        |> Util.fails "foo bar" true
+
+    let ``matching a second string succeeds with backtracking`` () =
+        either (probe (string "four")) (string "foo")
+        |> Util.succeed "foo bar" "foo"
