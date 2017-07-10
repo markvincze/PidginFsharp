@@ -13,7 +13,8 @@ module Basic =
 
     let tokenNot t = tokenPred (fun t' -> t' <> t)
 
-    let value t state = Types.parseSuccess false t
+    let value t state = 
+        Types.parseSuccess false t
 
     let any state =
         match ParserState.peek state with

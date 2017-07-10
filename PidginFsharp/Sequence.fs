@@ -2,6 +2,7 @@ namespace PidginFsharp
 
 module Sequence =
     open Basic
+    open ParserState
 
     let after parser1 parser2 state =
         match parser1 state with
@@ -102,3 +103,13 @@ module Sequence =
                         | Success r2 -> Types.parseSuccess (r1.Consumed || r2.Consumed) (r1.Value :: r2.Value)
 
     let separated separator parser = either (separatedAtLeastOnce separator parser) (value [])
+
+    let probe parser state =
+        pushBookmark state |> ignore
+        match parser state with
+        | Failure r -> 
+            rewind state |> ignore
+            Types.parseFailure false r.Message
+        | Success s ->
+            popBookmark state |> ignore
+            Success s 
