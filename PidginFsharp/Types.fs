@@ -10,14 +10,29 @@ type ParseSuccess<'T> = {
 
 type ParseSuccess = string
 
-type ParseState =
-| StringParseState of string * int
+type IParseState<'a> =
+    abstract member Advance: unit -> unit
+    
+    abstract member Peek: unit -> 'a option
+
+type StringParseState<'a>(str) =
+    let mutable str = str
+    let mutable pos = 0
+
+    interface IParseState<char> with
+        member this.Peek () =
+            if pos >= 0 && pos < String.length str
+            then Seq.item pos str |> Some
+            else None
+
+        member this.Advance () =
+            pos <- pos + 1
 
 type Result<'T> =
 | Success of ParseSuccess<'T>
 | Failure of ParseError
 
-type Parse<'T> = ParseState -> Result<'T> * ParseState
+type Parse<'T> = IParseState<'T> -> Result<'T>
 
 module Types =
     let parseSuccess consumed value =

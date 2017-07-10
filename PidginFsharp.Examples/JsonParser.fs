@@ -12,23 +12,23 @@ module JsonParser =
     open Basic
     open Sequence
 
-    let whitespace = tokenPred Char.IsWhiteSpace
-    let whitespaces = many whitespace
-    let lbrace = token '{'
-    let rbrace = token '}'
-    let lbracket = token '['
-    let rbracket = token ']'
-    let quote = token '"'
-    let colon = token ':'
-    let colonWhitespace = between whitespaces whitespaces colon
-    let comma = token ','
+    let whitespace state = tokenPred Char.IsWhiteSpace <| state
+    let whitespaces state = many whitespace <| state
+    let lbrace state = token '{' <| state
+    let rbrace state = token '}' <| state
+    let lbracket state = token '[' <| state
+    let rbracket state = token ']' <| state
+    let quote state = token '"' <| state
+    let colon state = token ':' <| state
+    let colonWhitespace state = between whitespaces whitespaces colon <| state
+    let comma state = token ',' <| state
 
-    let string =
+    let string state =
         many (tokenNot '"')
         |> between quote quote
-        |> select String.Concat
+        |> select String.Concat <| state
 
-    let jsonString = string |> select JsonString
+    let jsonString state = string |> select JsonString <| state
     
     let rec jsonRaw state =
         oneOf [ jsonString; jsonArray; jsonObject ] <| state
@@ -47,4 +47,4 @@ module JsonParser =
         |> between lbrace rbrace
         |> select (Map.ofList >> JsonObject) <| state
 
-    let json = jsonRaw |> between whitespaces whitespaces
+    let json state = jsonRaw |> between whitespaces whitespaces <| state

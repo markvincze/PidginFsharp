@@ -16,24 +16,12 @@ module RecursiveTests =
 
     [<Fact>]
     let ``digitInsideParens succeeds if the number of parens match`` () =
-        let state = StringParseState ("(((5)))", 0)
-        let actual = digitInsideParens state
-        let expected = Success { Consumed = true; Value = '5' }, StringParseState ("(((5)))", 7)
-
-        Assert.Equal<Result<char> * ParseState>(expected, actual)
+        digitInsideParens |> Util.succeed "(((5)))" '5'
 
     [<Fact>]
     let ``digitInsideParens fails if the number of parens don't match`` () =
-        let state = StringParseState ("(((5))", 0)
-        let actual = digitInsideParens state
-        let expected = Failure { Consumed = true; Message = "End of input." }, StringParseState ("(((5))", 6)
-
-        Assert.Equal<Result<char> * ParseState>(expected, actual)
+        digitInsideParens |> Util.fails "(((5))" true
 
     [<Fact>]
     let ``digitInsideParens fails if the there is no digit inside`` () =
-        let state = StringParseState ("(((a)))", 0)
-        let actual = digitInsideParens state
-        let expected = Failure { Consumed = true; Message = "Not matching token." }, StringParseState ("(((a)))", 3)
-
-        Assert.Equal<Result<char> * ParseState>(expected, actual)
+        digitInsideParens |> Util.fails "(((a)))" true
