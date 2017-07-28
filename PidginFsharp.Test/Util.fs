@@ -7,14 +7,14 @@ module Util =
     open Basic
 
     let succeed str result parser =
-        let state = StringParseState(str)
+        let state = ParserState.createStringParserState str
         let actual = parser state
         let expected = Success { Consumed = true; Value = result }
 
         Assert.Equal<'T>(expected, actual)
 
     let fails str consumed parser =
-        let state = StringParseState(str)
+        let state = ParserState.createStringParserState str
         let actual = parser state
         
         match actual with

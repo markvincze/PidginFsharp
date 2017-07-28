@@ -7,13 +7,13 @@ open Xunit
 module ParserStateTests =
     [<Fact>]
     let ``peek returns the first character`` () =
-        let actual = StringParseState("abc") |> ParserState.peek
+        let actual = ParserState.createStringParserState "abc" |> ParserState.peek
         let expected = Some 'a'
         Assert.Equal<char option>(expected, actual)
 
     [<Fact>]
     let ``advance moves one character further`` () =
-        let state = StringParseState ("abc")
+        let state = ParserState.createStringParserState "abc"
         state |> ParserState.advance
         let actual = state |> ParserState.peek
         let expected = Some 'b'
@@ -21,7 +21,7 @@ module ParserStateTests =
 
     [<Fact>]
     let ``after advancing after the end peek returns None`` () =
-        let state = StringParseState("abc")
+        let state = ParserState.createStringParserState "abc"
         state |> ParserState.advance
         state |> ParserState.advance
         state |> ParserState.advance

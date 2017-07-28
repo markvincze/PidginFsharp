@@ -1,7 +1,5 @@
 namespace PidginFsharp.Examples
 
-module Bar =
-    let bar foo = 5
 open System
 open PidginFsharp
 
@@ -27,41 +25,41 @@ module XmlParser =
         Content = content
     }
 
-    let whitespace state = tokenPred Char.IsWhiteSpace <| state
-    let whitespaces state = many whitespace <| state
-    let quote state = token '"' <| state
-    let openAngle state = token '<' <| state
-    let openAngleSlash state = string "</" <| state
-    let closeAngle state = token '>' <| state
+    let whitespace = tokenPred Char.IsWhiteSpace
+    let whitespaces = many whitespace
+    let quote = token '"'
+    let openAngle = token '<'
+    let openAngleSlash = string "</"
+    let closeAngle = token '>'
 
-    let attributeValue state =
+    let attributeValue =
         many (tokenNot '"')
-        |> select String.Concat <| state
+        |> select String.Concat
 
-    let symbolName state =
+    let symbolName =
         many (tokenPred Char.IsLetterOrDigit)
-        |> select String.Concat <| state
+        |> select String.Concat
 
-    let attribute state =
+    let attribute =
         map2
             (fun n v -> XmlAttribute (n, v))
             (symbolName |> before (token '='))
-            (between quote quote attributeValue) <| state
+            (between quote quote attributeValue)
 
-    let tagOpen state =
+    let tagOpen =
         map2
             (fun name attributes -> name, attributes)
             (after openAngle symbolName)
             (attribute |> separated whitespaces |> between whitespaces whitespaces)
-        |> before closeAngle <| state
+        |> before closeAngle
 
-    let tagClose name state =
+    let tagClose name =
         string name
-        |> between openAngleSlash closeAngle <| state
+        |> between openAngleSlash closeAngle
     
-    let rawString state =
+    let rawString =
         atLeastOnce (tokenNot '<')
-        |> select (String.Concat >> RawString) <| state
+        |> select (String.Concat >> RawString)
 
     let rec tag state =
         tagOpen
