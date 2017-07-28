@@ -148,7 +148,7 @@ module SequenceTests =
 
     [<Fact>]
     let ``many returns success with empty result if no token matched`` () =
-        let state = StringParseState("abc")
+        let state = ParserState.createStringParserState "abc"
         let actual = state |> many (token 'x')
         let expected = Success { Consumed = false; Value = [] }
 
@@ -196,7 +196,7 @@ module SequenceTests =
 
     [<Fact>]
     let ``separated succeeds if end of input`` () =
-        let state = StringParseState("")
+        let state = ParserState.createStringParserState ""
         let actual = state |> separated (token ' ') (string "foo")
         let expected = Success { Consumed = false; Value = [] }
 
@@ -219,7 +219,7 @@ module SequenceTests =
 
     [<Fact>]
     let ``separated succeeds if first doesn't match`` () =
-        let state = StringParseState("bar")
+        let state = ParserState.createStringParserState "bar"
         let actual = state |> separated (token ' ') (string "foo")
         let expected = Success { Consumed = false; Value = [ ] }
 

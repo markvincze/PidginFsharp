@@ -14,7 +14,8 @@ type Result<'T> =
 | Success of ParseSuccess<'T>
 | Failure of ParseError
 
-type Parse<'T> = IParseState<'T> -> Result<'T>
+// type Parse<'T> = IParseState<'T> -> Result<'T>
+type Parse<'T> = ParserState -> Result<'T>
 
 module Types =
     let parseSuccess consumed value =

@@ -33,7 +33,7 @@ module BasicTests =
 
     [<Fact>]
     let ``value returns the specified value without consuming input`` () =
-        let state = StringParseState("abc")
+        let state = ParserState.createStringParserState "abc"
         let actual = value 'd' state
         let expected = Success { Consumed = false; Value = 'd' }
 
@@ -45,7 +45,7 @@ module BasicTests =
 
     [<Fact>]
     let ``any fails if there is no more data`` () =
-        let state = StringParseState("abc")
+        let state = ParserState.createStringParserState "abc"
         state |> ParserState.advance
         state |> ParserState.advance
         state |> ParserState.advance
